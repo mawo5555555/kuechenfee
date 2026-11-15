@@ -2,6 +2,9 @@
 
 Bei jedem Update: `VERSION` + `VERSION_DATE` in index.html, Cache-Name in sw.js und diese Datei anpassen.
 
+## V1.4 – 15.11.2026
+- Neue Schritt-für-Schritt-Anleitung unter Mehr → Anleitung
+
 ## V1.3 – 15.11.2026
 - Handschrift-Import: Zeitüberschreitung behoben (schnelleres Modell ohne langes Nachdenken, kleinere Fotos, automatischer Wechsel auf ein anderes Modell)
 
