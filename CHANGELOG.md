@@ -2,6 +2,11 @@
 
 Bei jedem Update: `VERSION` + `VERSION_DATE` in index.html, Cache-Name in sw.js und diese Datei anpassen.
 
+## V1.1 – 15.11.2026
+- Fotorealistische Kategorie-Bilder (Kochen, Backen, Suppe, Salat, Frühstück, Dessert, Beilage, Snack, Getränk, Sonstiges); Rezepte ohne eigenes Foto zeigen das Bild ihrer Kategorie
+- Foto-Import liest nur Handschrift (per Gemini, eigener kostenloser API-Schlüssel, nur auf dem Gerät gespeichert); gedruckte Aufdrucke wie Kalender, Datum, Briefkopf werden ignoriert
+- Gedruckte Kochbuchseiten weiterhin ohne KI lesbar; Texterkennung gleicht Schatten aus und korrigiert typische Fehler (EL/TL, „l“ statt „1“, Silbentrennung)
+
 ## V1.0 – 15.11.2026
 - Neues Design (Küchenfee), Kategorien Kochen/Backen/Suppe/Salat/Frühstück/Dessert/Beilage/Snack/Getränk
 - Import per Link (Chefkoch & andere Seiten mit Rezeptdaten), per Text und per Kochbuch-Foto (Texterkennung)
