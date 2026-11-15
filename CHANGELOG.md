@@ -2,6 +2,9 @@
 
 Bei jedem Update: `VERSION` + `VERSION_DATE` in index.html, Cache-Name in sw.js und diese Datei anpassen.
 
+## V1.5 – 15.11.2026
+- Hilfetexte direkt an den Bedienflächen: ausklappbares „So geht’s“ bei Rezeptliste, Hinzufügen (Webseite, Foto, Text, von Hand), Rechner, Einkaufsliste; Hinweise an den Feldern im Rezeptformular, bei Portionen/Kochen/Teilen im Rezept und im Kochmodus
+
 ## V1.4 – 15.11.2026
 - Neue Schritt-für-Schritt-Anleitung unter Mehr → Anleitung
 

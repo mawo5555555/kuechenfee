@@ -108,6 +108,7 @@ nav a.on{color:var(--acc2)}
 .toast{position:fixed;left:50%;bottom:calc(98px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#33271f;color:#fff;padding:11px 20px;border-radius:999px;font-size:14px;z-index:90;box-shadow:var(--shadow);max-width:90vw;text-align:center}
 .preview{max-width:260px;border-radius:14px;margin-top:8px;display:block}
 .hint{font-size:13px;color:var(--mut);margin-top:6px}
+.how{margin:10px 0 4px;font-size:13.5px;color:var(--mut)}.how summary{cursor:pointer;color:var(--acc2);font-weight:600;padding:4px 0}.how ol{margin:6px 0 2px;padding-left:20px;line-height:1.5}.how li{margin-bottom:3px}
 .opt{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:18px;margin-bottom:14px}
 .opt h3{margin:0 0 4px;font-size:17px;font-family:var(--serif)}
 .opt p{margin:0 0 12px;color:var(--mut);font-size:14px}
@@ -148,10 +149,11 @@ nav a.on{color:var(--acc2)}
 
 <script>
 'use strict';
-const VERSION = '1.4';
+const VERSION = '1.5';
 const VERSION_DATE = '15.11.2026';
 /* ================= Helfer ================= */
 const $ = (s, r = document) => r.querySelector(s);
+const how = (t, items) => `<details class="how"><summary>ⓘ ${t}</summary><ol>${items.map(i => `<li>${i}</li>`).join('')}</ol></details>`;
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -579,6 +581,7 @@ function viewList() {
     <div class="brand"><div class="logo">✦</div><div><h1>Küchenfee</h1><small>Deine Rezeptsammlung · ${recipes.length} Rezepte · <span style="opacity:.7">V${VERSION}</span></small></div></div>
     ${backupDue() ? `<div class="opt" style="padding:12px 14px;display:flex;gap:12px;align-items:center"><span style="font-size:26px">💾</span><div class="grow"><b>Backup empfohlen</b><div class="hint" style="margin:0">${lastBackup() ? 'Letztes Backup vor ' + Math.round((Date.now() - lastBackup()) / 864e5) + ' Tagen.' : 'Noch kein Backup angelegt.'}</div></div><button class="btn sm" id="bkn">Jetzt sichern</button></div>` : ''}
     <div class="search"><input type="search" id="q" placeholder="Rezept oder Zutat suchen …" value="${esc(q)}" autocomplete="off"></div>
+    ${how('So benutzt du die Rezeptliste', ['<b>+ Rezept</b> (unten rechts) legt ein neues Rezept an: per Link, Foto, Text oder von Hand.', 'Die Kacheln filtern nach Kategorie, ❤ zeigt deine Favoriten.', 'Im Suchfeld findest du Rezepte nach Name oder Zutat.', 'Ein Rezept antippen öffnet es; das ♡ auf dem Bild markiert Favoriten.'])}
     <div class="tiles">${tiles.map(([c, e]) => `<button class="tile ${c === catF ? 'on' : ''}" data-c="${esc(c)}"><div class="e">${e}</div>${esc(c)} <i>${cnt(c)}</i></button>`).join('')}</div>
     <div id="grid"></div>`;
   $('#q').oninput = e => { q = e.target.value; drawGrid(); };
@@ -620,7 +623,8 @@ function viewRecipe(id) {
     <h1>${esc(r.title)}</h1>
     <div class="meta"><span class="pill">${EMOJI[r.cat] || ''} ${esc(r.cat)}</span>${r.time ? `<span>⏱ ${r.time} Min</span>` : ''}</div>
     ${su ? `<div class="src">Quelle: <a href="${esc(su)}" target="_blank" rel="noopener">${esc(host(su))}</a></div>` : ''}
-    <div class="row noprint" style="margin:14px 0 4px">
+    <div class="hint noprint" style="margin:10px 0 0">− / + stellt die Portionen ein, alle Mengen rechnen mit. <b>Kochen</b> öffnet den Kochmodus: ein Schritt pro Seite, Bildschirm bleibt an.</div>
+    <div class="row noprint" style="margin:8px 0 4px">
       <div class="stepper"><button id="pm" aria-label="Weniger">−</button><span>${fmtP(P)} ${P === 1 ? 'Portion' : 'Portionen'}</span><button id="pp" aria-label="Mehr">+</button></div>
       <div class="grow"></div>
       <button class="btn" id="cook">👩‍🍳 Kochen</button>
@@ -636,7 +640,8 @@ function viewRecipe(id) {
     <h2>Zubereitung</h2>
     <div class="panel">${r.steps.length ? r.steps.map((s, i) => `<div class="step"><div class="n">${i + 1}</div><div>${esc(s)}${timerBtns(s)}</div></div>`).join('') : '<div class="step"><span class="notes">Keine Schritte eingetragen.</span></div>'}</div>
     ${r.notes ? `<h2>Notizen</h2><div class="notes">${esc(r.notes)}</div>` : ''}
-    <div class="row noprint" style="margin-top:28px">
+    <div class="hint noprint" style="margin-top:26px">✏️ Bearbeiten ändert alles am Rezept · 📤 Teilen schickt es als Link, Text oder Datei · 🖨 Drucken erzeugt eine Druckansicht · 🗑 Löschen entfernt es (vorher Backup bedenken).</div>
+    <div class="row noprint" style="margin-top:10px">
       <button class="btn ghost sm" id="edit">✏️ Bearbeiten</button>
       <button class="btn ghost sm" id="share">📤 Teilen</button>
       <button class="btn ghost sm" id="print">🖨 Drucken</button>
@@ -781,7 +786,7 @@ function viewCook(id) {
       <div class="hd"><button class="back" id="cx" aria-label="Beenden">✕</button><b class="grow serif">${esc(r.title)}</b><span class="hint">${k + 1}/${pages.length}</span></div>
       <div class="bar"><i style="width:${(k + 1) / pages.length * 100}%"></i></div>
       <div class="body">${p.t === 'ing'
-        ? `<div class="cnt">Zutaten für ${P} ${P === 1 ? 'Portion' : 'Portionen'}</div>` + r.ingredients.map(i => { const s = scaleAmt(i.a, i.u, f); return `<div class="ing big"><b>${esc([fmtNum(s.a), s.u].filter(Boolean).join(' '))}</b><span>${esc(i.n)}</span></div>`; }).join('')
+        ? `<div class="hint" style="margin-bottom:8px">Alles bereitlegen, dann unten <b>Weiter</b> tippen. Mit <b>‹ Zurück</b> gehst du einen Schritt zurück, mit ✕ beendest du.</div><div class="cnt">Zutaten für ${P} ${P === 1 ? 'Portion' : 'Portionen'}</div>` + r.ingredients.map(i => { const s = scaleAmt(i.a, i.u, f); return `<div class="ing big"><b>${esc([fmtNum(s.a), s.u].filter(Boolean).join(' '))}</b><span>${esc(i.n)}</span></div>`; }).join('')
         : `<div class="cnt">Schritt ${p.i + 1}</div><div class="big">${esc(p.s)}</div>${timerBtns(p.s)}`}</div>
       <div class="ft"><button class="btn ghost" id="pv" ${k === 0 ? 'disabled' : ''}>‹ Zurück</button>
         <button class="btn" id="nx">${last ? '✓ Fertig' : 'Weiter ›'}</button></div>`;
@@ -798,14 +803,17 @@ function viewImport() {
   nav('add');
   app.innerHTML = `
     <h1>Rezept hinzufügen</h1>
+    <div class="hint" style="margin:-6px 0 12px">Vier Wege, ein Rezept in die Küchenfee zu bekommen. Unter „ⓘ So geht’s“ steht jeweils, was zu tun ist.</div>
     <div class="opt"><h3>🔗 Von einer Webseite</h3>
       <p>Chefkoch.de, Essen & Trinken, Lecker, Blogs … Link einfügen – die Küchenfee holt Zutaten und Zubereitung heraus.</p>
       <div class="row" style="flex-wrap:nowrap"><input type="url" id="u" placeholder="https://www.chefkoch.de/rezepte/…" autocomplete="off" autocapitalize="off"><button class="btn sec" id="paste">Einfügen</button></div>
       <div class="row" style="margin-top:10px"><button class="btn" id="go">Rezept holen</button></div>
+      ${how('So geht’s', ['Rezept auf der Webseite öffnen und die Adresse kopieren (in Safari: Adressleiste antippen → Kopieren).', 'Hier <b>Einfügen</b> tippen, dann <b>Rezept holen</b>.', 'Zutaten, Schritte, Zeit und Foto werden übernommen; du prüfst alles und tippst <b>Speichern</b>.', 'Klappt eine Seite nicht: Rezepttext kopieren und weiter unten bei „Text einfügen“ nutzen.'])}
       <div class="status" id="s1"></div>
       <div class="hint">Der Link wird über einen kostenlosen Hilfsdienst geladen. Klappt eine Seite nicht, hilft „Text einfügen“ unten.</div></div>
     <div class="opt"><h3>📷 Handschrift fotografieren</h3>
       <p>Rezeptkarte, Heft oder Zettel fotografieren. Die Küchenfee liest <b>nur die Handschrift</b> – Gedrucktes wie Kalender, Datum, Briefkopf oder Linien wird ignoriert. Mehrere Seiten: einfach mehrere Fotos wählen.</p>
+      ${how('So geht’s', ['Beim ersten Mal den kostenlosen Schlüssel von aistudio.google.com/apikey erzeugen, kopieren und im Feld einfügen; mit „Verbindung testen“ prüfen.', '<b>Foto aufnehmen / wählen</b> tippen. Gutes Licht, Blatt flach, ganze Seite im Bild. Mehrere Seiten gleichzeitig sind möglich.', 'Nach 10–30 Sekunden erscheint das erkannte Rezept zum Prüfen. Mengen und Namen kurz kontrollieren.', 'Mit „Foto beim Rezept aufbewahren“ bleibt das Originalfoto beim Rezept.'])}
       <div id="keybox"></div>
       <input type="file" id="ph" accept="image/*" multiple style="display:none">
       <button class="btn" id="phb">📷 Foto aufnehmen / wählen</button>
@@ -816,9 +824,10 @@ function viewImport() {
         <input type="file" id="ph2" accept="image/*" multiple style="display:none"><button class="btn sec sm" id="phb2">Gedrucktes Kochbuch lesen</button></details></div>
     <div class="opt"><h3>📋 Text einfügen</h3>
       <p>Rezepttext aus einer Nachricht, PDF oder Webseite hineinkopieren. Tipp iPhone: Im Foto Text antippen und halten („Live Text“), kopieren und hier einfügen.</p>
+ ${how('So geht’s', ['Text kopieren (aus Nachricht, PDF, Webseite oder per „Live Text“ aus einem Foto).', 'Hier einfügen: erste Zeile = Titel, dann Zutaten, dann Zubereitung.', '<b>Übernehmen</b> tippen, prüfen, speichern.'])}
       <textarea id="tx" placeholder="Rezepttitel&#10;Zutaten&#10;200 g Mehl …&#10;Zubereitung&#10;…"></textarea>
       <div class="row" style="margin-top:10px"><button class="btn" id="tb">Übernehmen</button></div></div>
-    <div class="opt"><h3>✍️ Von Hand eintragen</h3><p>Eigenes Rezept selbst schreiben.</p><button class="btn sec" id="hand">Neues Rezept</button></div>`;
+    <div class="opt"><h3>✍️ Von Hand eintragen</h3><p>Eigenes Rezept selbst schreiben.</p>${how('So geht’s', ['<b>Neues Rezept</b> öffnet ein leeres Formular.', 'Name, Kategorie, Portionen und Minuten eintragen.', 'Zutaten und Schritte jeweils eine Zeile pro Eintrag.', '<b>Speichern</b> legt das Rezept in deiner Sammlung ab.'])}<button class="btn sec" id="hand">Neues Rezept</button></div>`;
   const s1 = $('#s1'), s2 = $('#s2');
   const say = el => (t, err) => { el.className = 'status' + (err ? ' err' : ''); el.innerHTML = (err ? '' : '<span class="spin"></span>') + esc(t); };
   const open = d => { d.imgUrl = undefined; draft = d; go('#/new'); };
@@ -883,21 +892,22 @@ function viewEdit(id) {
   app.innerHTML = `
     <div class="top"><button class="back" onclick="history.back()" aria-label="Zurück">‹</button><h1 style="margin:0">${r ? 'Rezept bearbeiten' : isDraft ? 'Rezept prüfen' : 'Neues Rezept'}</h1></div>
     ${isDraft ? '<div class="hint" style="margin:0 0 6px">Bitte kurz prüfen und korrigieren, dann speichern. Zutaten: Menge und Einheit vorne (z. B. „250 g Zucker“).</div>' : ''}
-    <label>Name</label><input type="text" id="t" value="${esc(base?.title)}" placeholder="z. B. Omas Gulasch" autocomplete="off">
+    <label>Name</label><div class="hint" style="margin:2px 0 4px">So heißt das Rezept in der Liste.</div><input type="text" id="t" value="${esc(base?.title)}" placeholder="z. B. Omas Gulasch" autocomplete="off">
     <div class="row" style="align-items:flex-start">
       <div class="grow" style="min-width:140px"><label>Kategorie</label><select id="c">${CATS.map(c => `<option ${c === (base?.cat || 'Kochen') ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
       <div style="width:100px"><label>Portionen</label><input type="number" id="p" min="1" max="99" value="${base?.portions || 4}" inputmode="numeric"></div>
       <div style="width:100px"><label>Minuten</label><input type="number" id="m" min="0" value="${base?.time || ''}" inputmode="numeric"></div>
     </div>
-    <label>Foto</label>
+    <div class="hint" style="margin:-4px 0 6px">Kategorie bestimmt das Standardbild und den Filter in der Liste. Portionen = für wie viele Personen die Mengen gelten (Basis für den Rechner). Minuten = gesamte Zeit.</div>
+    <label>Foto</label><div class="hint" style="margin:2px 0 4px">Optional. Ohne eigenes Foto zeigt die Küchenfee das Bild der Kategorie.</div>
     <div class="row"><input type="file" id="f" accept="image/*" style="display:none"><button class="btn sec sm" id="fb">📷 Foto wählen</button><button class="btn ghost sm" id="fx" ${img ? '' : 'hidden'}>Entfernen</button></div>
     <img class="preview" id="pv" ${img ? `src="${img}"` : 'hidden'} alt="">
-    <label>Zutaten (eine pro Zeile)</label>
+    <label>Zutaten (eine pro Zeile)</label><div class="hint" style="margin:2px 0 4px">Menge und Einheit zuerst, dann der Name: „250 g Mehl“, „2 EL Öl“, „1 Prise Salz“, „½ Bund Petersilie“. Nur so kann die Küchenfee Mengen umrechnen.</div>
     <textarea id="i" style="min-height:150px" placeholder="500 g Mehl&#10;2 EL Öl&#10;1 Prise Salz">${esc((base?.ingredients || []).map(ingText).join('\n'))}</textarea>
-    <label>Zubereitung (ein Schritt pro Zeile)</label>
+    <label>Zubereitung (ein Schritt pro Zeile)</label><div class="hint" style="margin:2px 0 4px">Jede Zeile wird im Kochmodus eine eigene Seite. Zeitangaben wie „20 Minuten“ bekommen dort automatisch einen Timer.</div>
     <textarea id="s" style="min-height:190px" placeholder="Ofen vorheizen …&#10;Teig kneten …">${esc((base?.steps || []).join('\n'))}</textarea>
-    <label>Notizen</label><textarea id="n" style="min-height:80px">${esc(base?.notes)}</textarea>
-    <label>Quelle (Link)</label><input type="url" id="src" value="${esc(base?.src)}" placeholder="optional" autocapitalize="off">
+    <label>Notizen</label><div class="hint" style="margin:2px 0 4px">Z. B. Tipps, Abwandlungen, von wem das Rezept ist.</div><textarea id="n" style="min-height:80px">${esc(base?.notes)}</textarea>
+    <label>Quelle (Link)</label><div class="hint" style="margin:2px 0 4px">Bei Webseiten-Rezepten erscheint dadurch „In Bring! öffnen“ und die Quellenangabe.</div><input type="url" id="src" value="${esc(base?.src)}" placeholder="optional" autocapitalize="off">
     ${isDraft && base.rawText ? `<details style="margin-top:14px"><summary class="hint">Erkannten Rohtext anzeigen</summary><pre class="notes" style="font:13px/1.4 ui-monospace,monospace">${esc(base.rawText)}</pre></details>` : ''}
     <div class="row" style="margin:22px 0"><button class="btn grow" id="save">Speichern</button><button class="btn ghost" onclick="history.back()">Abbrechen</button></div>`;
   $('#fb').onclick = () => $('#f').click();
@@ -934,6 +944,7 @@ function viewCalc() {
   app.innerHTML = `
     <h1>Rechner</h1>
     <div class="hint" style="margin:-6px 0 12px">Wähle ein oder mehrere Rezepte, stelle die Portionen ein oder gib eine Menge vor, die du hast – die Küchenfee rechnet alles um und fasst die Zutaten zusammen.</div>
+    ${how('So geht’s', ['Unter „Rezept hinzufügen“ ein Rezept wählen – du kannst mehrere kombinieren.', 'Mit − / + die Portionen ändern <b>oder</b> bei einer Zutat die Menge eintippen, die du hast; alles andere rechnet mit.', 'Unten stehen die zusammengefassten Gesamtmengen aller Rezepte.', '<b>Auf die Einkaufsliste</b> übernimmt sie, <b>Teilen</b> schickt sie weiter.'])}
     <select id="cs"><option value="">＋ Rezept hinzufügen …</option>${recipes.filter(r => !ids.includes(r.id)).sort((a, b) => a.title.localeCompare(b.title, 'de')).map(r => `<option value="${r.id}">${esc(r.title)}</option>`).join('')}</select>
     ${ids.map(id => {
       const r = byId(id), P = calcSel[id] * r.portions;
@@ -967,6 +978,7 @@ function viewShop() {
   const item = s => `<div class="shop-item ${s.done ? 'done' : ''}"><input type="checkbox" data-d="${s.id}" ${s.done ? 'checked' : ''} aria-label="erledigt"><span>${esc(ingText(s))}</span><button class="x" data-x="${s.id}" aria-label="Löschen">✕</button></div>`;
   app.innerHTML = `
     <h1>Einkaufsliste</h1>
+ ${how('So benutzt du die Einkaufsliste', ['Oben eigene Artikel eintippen („2 Dosen Mais“) und mit + hinzufügen.', 'Aus Rezepten und dem Rechner kommen Zutaten mit einem Tipp hierher; gleiche Zutaten werden zusammengerechnet.', 'Beim Einkaufen Haken setzen: Erledigtes rutscht nach unten. ✕ löscht einen Eintrag.', '<b>Teilen</b> schickt die Liste (z. B. an Bring! oder per Nachricht).'])}
     <form id="af" class="row" style="flex-wrap:nowrap"><input type="text" id="ai" placeholder="Hinzufügen, z. B. 2 Dosen Mais" autocomplete="off"><button class="btn" aria-label="Hinzufügen">+</button></form>
     <div style="margin-top:8px">${open.map(item).join('') || '<div class="empty"><span class="big">🛒</span>Die Liste ist leer.<br>Auf einem Rezept „Alles auf die Einkaufsliste“ tippen.</div>'}</div>
     ${done.length ? `<h2>Erledigt</h2>${done.map(item).join('')}` : ''}
