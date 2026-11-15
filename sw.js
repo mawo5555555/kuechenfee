@@ -1,4 +1,4 @@
-const CACHE = 'kuechenfee-v1.1';
+const CACHE = 'kuechenfee-v1.2';
 const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png', 'img/kochen.jpg', 'img/backen.jpg', 'img/suppe.jpg', 'img/salat.jpg', 'img/fruehstueck.jpg', 'img/dessert.jpg', 'img/beilage.jpg', 'img/snack.jpg', 'img/getraenk.jpg', 'img/sonstiges.jpg'];
 
 self.addEventListener('install', e => {
