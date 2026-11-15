@@ -148,7 +148,7 @@ nav a.on{color:var(--acc2)}
 
 <script>
 'use strict';
-const VERSION = '1.2';
+const VERSION = '1.3';
 const VERSION_DATE = '15.11.2026';
 /* ================= Helfer ================= */
 const $ = (s, r = document) => r.querySelector(s);
@@ -481,17 +481,21 @@ async function geminiRecipe(files, say) {
   const key = getKey(); if (!key) throw new Error('Kein Gemini-Schlüssel hinterlegt');
   say('Fotos werden vorbereitet …');
   const parts = [{ text: HW_PROMPT }];
-  for (const f of files) { const c = await toCanvas(f, 1800, false); parts.push({ inline_data: { mime_type: 'image/jpeg', data: c.toDataURL('image/jpeg', .85).split(',')[1] } }); }
+  for (const f of files) { const c = await toCanvas(f, 1500, false); parts.push({ inline_data: { mime_type: 'image/jpeg', data: c.toDataURL('image/jpeg', .8).split(',')[1] } }); }
   say('Handschrift wird gelesen …');
-  let r;
-  for (const model of ['gemini-flash-latest', 'gemini-2.5-flash']) {
+  let r, lastErr;
+  for (const model of ['gemini-2.5-flash', 'gemini-flash-latest', 'gemini-2.0-flash']) {
+    const cfg = { responseMimeType: 'application/json', responseSchema: HW_SCHEMA, temperature: .1 };
+    if (model === 'gemini-2.5-flash') cfg.thinkingConfig = { thinkingBudget: 0 };
     try {
-      r = await withTimeout(120000, sg => fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`, {
+      r = await withTimeout(75000, sg => fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: sg,
-        body: JSON.stringify({ contents: [{ parts }], generationConfig: { responseMimeType: 'application/json', responseSchema: HW_SCHEMA, temperature: .1 } }) }));
-    } catch (e) { throw new Error(netErr(e)); }
-    if (r.status !== 404) break;
+        body: JSON.stringify({ contents: [{ parts }], generationConfig: cfg }) }));
+    } catch (e) { lastErr = e; r = null; say('Nochmal versuchen mit anderem Modell …'); continue; }
+    if (r.status === 404 || r.status === 503 || r.status === 500) { lastErr = null; continue; }
+    break;
   }
+  if (!r) throw new Error(netErr(lastErr));
   if (r.status === 400 || r.status === 401 || r.status === 403) throw new Error('Gemini hat den Schlüssel nicht akzeptiert – bitte neu eintragen');
   if (r.status === 429) throw new Error('Gemini-Limit erreicht – bitte in einer Minute noch einmal');
   if (!r.ok) { let m = ''; try { m = (await r.json()).error?.message || ''; } catch {} throw new Error('Gemini-Fehler ' + r.status + (m ? ': ' + m.slice(0, 160) : '')); }
