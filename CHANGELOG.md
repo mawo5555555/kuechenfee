@@ -2,6 +2,9 @@
 
 Bei jedem Update: `VERSION` + `VERSION_DATE` in index.html, Cache-Name in sw.js und diese Datei anpassen.
 
+## V1.6 – 15.11.2026
+- Handschrift-Import: Die App fragt bei Gemini ab, welche Modelle aktuell verfügbar sind, und nutzt automatisch das passende (abgeschaltete Modelle verursachten Fehler 404)
+
 ## V1.5 – 15.11.2026
 - Hilfetexte direkt an den Bedienflächen: ausklappbares „So geht’s“ bei Rezeptliste, Hinzufügen (Webseite, Foto, Text, von Hand), Rechner, Einkaufsliste; Hinweise an den Feldern im Rezeptformular, bei Portionen/Kochen/Teilen im Rezept und im Kochmodus
 
